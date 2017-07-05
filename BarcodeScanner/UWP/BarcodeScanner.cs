@@ -78,7 +78,7 @@ namespace Zebble.Plugin
                 var resultDecode = reader.Decode(image);
                 // do something with the result
                 if (resultDecode != null)
-                    return resultDecode.BarcodeFormat.ToString() + resultDecode.Text;
+                    return resultDecode.Text;
 
             }
             return "";
@@ -188,7 +188,7 @@ namespace Zebble.Plugin
             timerPreview = new Timer(async (state) =>
             {
 
-                var delay = 160;
+                var delay = 150;
 
                 if (stopping || processing || !isAnalyzing
                 || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
