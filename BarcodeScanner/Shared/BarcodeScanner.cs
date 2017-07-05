@@ -16,7 +16,7 @@
             }
             catch (Exception ex)
             {
-                await errorAction.Apply(ex, "Failed to scan a barcode.");
+                await errorAction.Apply(ex, "Failed to scan a barcode");
                 return null;
             }
         }
