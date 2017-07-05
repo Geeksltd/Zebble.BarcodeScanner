@@ -188,7 +188,7 @@ namespace Zebble.Plugin
             timerPreview = new Timer(async (state) =>
             {
 
-                var delay = 150;
+                var delay = 160;
 
                 if (stopping || processing || !isAnalyzing
                 || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
@@ -196,6 +196,8 @@ namespace Zebble.Plugin
                     timerPreview.Change(delay, Timeout.Infinite);
                     return;
                 }
+
+
 
                 processing = true;
 
