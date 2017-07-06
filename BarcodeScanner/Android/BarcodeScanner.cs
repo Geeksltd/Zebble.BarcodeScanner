@@ -17,9 +17,9 @@ namespace Zebble.Plugin
 {
     public partial class BarcodeScanner
     {
-
-        public Task<string> DoScan(Action<ZXing.Result> scanCallback)
-        {
+     
+            public Task<string> DoScan(Action<ZXing.Result> scanCallback)
+            {
             Android.App.Application app = new Android.App.Application();
             MobileBarcodeScanner scanner;
             MobileBarcodeScanner.Initialize(app);
@@ -33,15 +33,7 @@ namespace Zebble.Plugin
             {
                 string rs = string.Empty;
                 scanner = new ZXing.Mobile.MobileBarcodeScanner();
-                //scanner.ScanContinuously((result) =>
-                //{
-                //    if (result != null)
-                //    {
-                //        //Alert.Show("Result : ", result.ToString());                        
-                //        rs=result.Text;
-                //        return;
-                //    }
-                //});
+              
                 var result= scanner.Scan();
                 if (result.Result != null)
                 {
@@ -53,12 +45,14 @@ namespace Zebble.Plugin
             catch (Exception ex)
             {
 
-            }
-           // if (result.Result != null)
-          //      return Task.FromResult(result.Result.Text);
+            }         
 
             return Task.FromResult("");
         }
 
+        public async void StopScanning()
+        {
+
+        }
     }
 }

@@ -8,11 +8,15 @@
 
     public partial class BarcodeScanner : CustomRenderedView<BarcodeScannerRenderer>
     {
-        public async Task<string> Scan(Action<ZXing.Result> scanCallback,OnError errorAction = OnError.Alert)
+        public async Task<string> Scan(OnError errorAction = OnError.Alert)
         {
             try
             {
-                return await DoScan(scanCallback);
+                return await DoScan(r =>
+                {
+                    StopScanning();
+                    //rrr = r.Text;
+                });
             }
             catch (Exception ex)
             {
