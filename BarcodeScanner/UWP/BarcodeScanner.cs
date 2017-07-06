@@ -41,26 +41,30 @@ namespace Zebble.Plugin
         {
             string result = "";
 
-            await Device.UIThread.Run(async () =>
+            try
             {
-                result = await StartScanning(scanCallback);
-            });
-
-
-            if (result == "No camera available")
-            {
-                result = "";
-                var temp = await Device.Media.PickPhoto();
-
-                if (temp != null)
+                await Device.UIThread.Run(async () =>
                 {
-                    await Device.UIThread.Run(async () =>
-                    {
-                        result = await StartLoadImage(temp);
-                    });
-                }
+                    result = await StartScanning(scanCallback);
+                });
             }
+            catch (Exception ex)
+            {
+                if (ex.Message == "No camera available")
+                {                   
+                    var temp = await Device.Media.PickPhoto();
 
+                    if (temp != null)
+                    {
+                        await Device.UIThread.Run(async () =>
+                        {
+                            result = await StartLoadImage(temp);
+                        });
+                    }
+                }
+                else
+                    throw ex;
+            }
             return await Task.FromResult(result);
         }
 
@@ -107,7 +111,8 @@ namespace Zebble.Plugin
                 System.Diagnostics.Debug.WriteLine("No camera available");
                 isMediaCaptureInitialized = false;
 
-                return "No camera available";
+              
+                throw new Exception("No camera available");
             }
 
 

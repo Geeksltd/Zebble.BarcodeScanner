@@ -3,17 +3,16 @@
   <metadata>
     <id>Zebble.Plugin.BarcodeScanner</id>
     <version>1.0.0</version>
-    <title> BarcodeScanner component for Zebble</title>
-    <description>...</description>
-    <authors>Your name</authors>
-    <owners>Your name</owners>
-    <!--<licenseUrl>http://your-website.com/Licence.txt</licenseUrl>-->
-    <copyright>Copyright ©2017 | Your company...</copyright>
+    <title>BarcodeScanner component for Zebble</title>
+    <description>This component is to make scanning barcodes.</description>
+    <authors>Geeks Ltd</authors>
+    <owners>Geeks Ltd</owners>
+    <projectUrl>https://github.com/Geeksltd/BarcodeScannerPlugin</projectUrl>
+    <copyright>Copyright ©2017 Geeks Ltd</copyright>
   </metadata>
   <files>
     <file src="lib\BarcodeScanner.iOS.*" target="lib\Xamarin.iOS10\" />
     <file src="lib\BarcodeScanner.Android.*" target="lib\MonoAndroid10\" />
     <file src="lib\BarcodeScanner.UWP.*" target="lib\UAP10\" />
   </files>
-
 </package>
