@@ -17,9 +17,9 @@ namespace Zebble.Plugin
 {
     public partial class BarcodeScanner
     {
-     
-            public Task<string> DoScan(Action<ZXing.Result> scanCallback)
-            {
+
+        public async Task<BarcodeResult> DoScanAsync( Action<ZXing.Result> scanCallback , bool useCamera = true)
+        {
             Android.App.Application app = new Android.App.Application();
             MobileBarcodeScanner scanner;
             MobileBarcodeScanner.Initialize(app);
@@ -33,22 +33,28 @@ namespace Zebble.Plugin
             {
                 string rs = string.Empty;
                 scanner = new ZXing.Mobile.MobileBarcodeScanner();
-              
-                var result= scanner.Scan();
-                if (result.Result != null)
+
+                var result = await scanner.Scan();
+                if (result != null)
                 {
-                    rs = result.Result.Text;                  
+
+                    var barcodeResult = new BarcodeResult();
+
+                    barcodeResult.Format = (Format)result.BarcodeFormat;
+                    barcodeResult.Text = result.Text;
+                    return barcodeResult;
                 }
-                if (!string.IsNullOrEmpty(rs))
-                    return Task.FromResult(rs);
             }
             catch (Exception ex)
             {
 
-            }         
+            }
 
-            return Task.FromResult("");
+            return null;
         }
+
+
+   
 
         public async void StopScanning()
         {

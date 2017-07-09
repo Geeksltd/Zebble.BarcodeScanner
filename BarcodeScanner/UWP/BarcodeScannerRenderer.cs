@@ -21,7 +21,7 @@ namespace Zebble.Plugin
             View = (BarcodeScanner)view;
             Result = new TheNativeType();
 
-
+         //   View.Add(new TextView("Hi"));
             //   Device.UIThread.Run(async () => await ScanImplementation1());
 
 

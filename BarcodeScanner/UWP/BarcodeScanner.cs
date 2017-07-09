@@ -37,38 +37,49 @@ namespace Zebble.Plugin
         public Action<Result> ScanCallback { get; set; }
 
        
-        public async Task<string> DoScan(Action<ZXing.Result> scanCallback)
+        public async Task<BarcodeResult> DoScanAsync(Action < ZXing.Result> scanCallback, bool useCamera = true)
         {
-            string result = "";
+            BarcodeResult result = new BarcodeResult();
 
-            try
+
+
+            if (useCamera)
             {
-                await Device.UIThread.Run(async () =>
+                try
                 {
-                    result = await StartScanning(scanCallback);
-                });
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message == "No camera available")
-                {                   
-                    var temp = await Device.Media.PickPhoto();
-
-                    if (temp != null)
+                    await Device.UIThread.Run(async () =>
                     {
-                        await Device.UIThread.Run(async () =>
-                        {
-                            result = await StartLoadImage(temp);
-                        });
-                    }
+                        result = await StartScanning(scanCallback);
+                    });
                 }
-                else
-                    throw ex;
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("No camera available"))
+                    {
+                        useCamera = false;
+                    }
+                    else
+                        throw ex;
+                }
             }
+
+            if (!useCamera)
+            {
+                var temp = await Device.Media.PickPhoto();
+
+                if (temp != null)
+                {
+                    await Device.UIThread.Run(async () =>
+                    {
+                        result = await LoadImage(temp);
+                    });
+                }
+            }
+
             return await Task.FromResult(result);
         }
 
-        async Task<string> StartLoadImage(System.IO.FileInfo temp)
+        async Task<BarcodeResult> LoadImage(System.IO.FileInfo temp)
         {
             StorageFile file = await StorageFile.GetFileFromPathAsync(temp.FullName);
             using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.ReadWrite))
@@ -82,16 +93,24 @@ namespace Zebble.Plugin
                 var resultDecode = reader.Decode(image);
                 // do something with the result
                 if (resultDecode != null)
-                    return resultDecode.Text;
+                {
+                   
+                      var  barcodeResult = new BarcodeResult();
+
+                        barcodeResult.Format = (Format)resultDecode.BarcodeFormat;
+                        barcodeResult.Text = resultDecode.Text;
+                        return barcodeResult;
+                  
+                }
 
             }
-            return "";
+            return null;
         }
 
-        async Task<string> StartScanning(Action<ZXing.Result> scanCallback)
+        async Task<BarcodeResult> StartScanning(Action<ZXing.Result> scanCallback)
         {
             if (stopping)
-                return "";
+                return null;
 
             displayInformation = DisplayInformation.GetForCurrentView();
             displayRequest = new DisplayRequest();
@@ -103,9 +122,12 @@ namespace Zebble.Plugin
             isAnalyzing = true;
             BarcodeReader reader;
             ZXing.Result result = null;
+          
             ScanCallback = scanCallback;
             // Find which device to use
             var preferredCamera = await GetFilteredCameraOrDefaultAsync();
+
+            throw new Exception("No camera available");
             if (preferredCamera == null)
             {
                 System.Diagnostics.Debug.WriteLine("No camera available");
@@ -243,7 +265,16 @@ namespace Zebble.Plugin
 
             }, null, 300, Timeout.Infinite);
 
-            return result != null ? result.Text :"";
+
+           if( result != null)
+            {
+               var  barcodeResult = new BarcodeResult();
+
+                barcodeResult.Format = (Format)result.BarcodeFormat;
+                barcodeResult.Text = result.Text;
+                return barcodeResult;
+            }
+            return null;
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync()
