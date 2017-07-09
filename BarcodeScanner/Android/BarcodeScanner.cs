@@ -17,13 +17,14 @@ namespace Zebble.Plugin
 {
     public partial class BarcodeScanner
     {
+        public Action<BarcodeResult> ScanCallback { get; set; }
 
-        public async Task<BarcodeResult> DoScanAsync( Action<ZXing.Result> scanCallback , bool useCamera = true)
+        public async Task DoScanAsync( Action<BarcodeResult> scanCallback , bool useCamera = true)
         {
             Android.App.Application app = new Android.App.Application();
             MobileBarcodeScanner scanner;
             MobileBarcodeScanner.Initialize(app);
-
+            ScanCallback = scanCallback;
 
             var options = new ZXing.Mobile.MobileBarcodeScanningOptions();
             options.PossibleFormats = new List<ZXing.BarcodeFormat>() {
@@ -42,15 +43,14 @@ namespace Zebble.Plugin
 
                     barcodeResult.Format = (Format)result.BarcodeFormat;
                     barcodeResult.Text = result.Text;
-                    return barcodeResult;
+
+                    ScanCallback(barcodeResult);
                 }
             }
             catch (Exception ex)
             {
 
-            }
-
-            return null;
+            }           
         }
 
 

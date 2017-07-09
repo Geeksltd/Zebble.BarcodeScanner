@@ -25,31 +25,30 @@ namespace Zebble.Plugin
 {
     public partial class BarcodeScanner
     {
-
+        CameraView cameraView;
+       
+      
         DisplayInformation displayInformation;
         DisplayRequest displayRequest;
         MediaCapture mediaCapture;       
         bool isMediaCaptureInitialized = false;
         Timer timerPreview;
         bool stopping = false;
-        volatile bool isAnalyzing = false;
+       
         static readonly Guid RotationKey = new Guid("C380465D-2271-428C-9B83-ECEA3B4A85C1");
-        public Action<Result> ScanCallback { get; set; }
+        public Action<BarcodeResult> ScanCallback { get; set; }
 
        
-        public async Task<BarcodeResult> DoScanAsync(Action < ZXing.Result> scanCallback, bool useCamera = true)
+        public async Task DoScanAsync(Action < BarcodeResult> scanCallback, bool useCamera = true)
         {
-            BarcodeResult result = new BarcodeResult();
-
-
-
+          
             if (useCamera)
             {
                 try
                 {
                     await Device.UIThread.Run(async () =>
                     {
-                        result = await StartScanning(scanCallback);
+                         await StartScanning(scanCallback);
                     });
                 }
                 catch (Exception ex)
@@ -71,12 +70,12 @@ namespace Zebble.Plugin
                 {
                     await Device.UIThread.Run(async () =>
                     {
-                        result = await LoadImage(temp);
+                        var  result = await LoadImage(temp);
+                       
+                        ScanCallback(result);
                     });
                 }
             }
-
-            return await Task.FromResult(result);
         }
 
         async Task<BarcodeResult> LoadImage(System.IO.FileInfo temp)
@@ -107,17 +106,20 @@ namespace Zebble.Plugin
             return null;
         }
 
-        async Task<BarcodeResult> StartScanning(Action<ZXing.Result> scanCallback)
+        async Task StartScanning(Action<BarcodeResult> scanCallback)
         {
             if (stopping)
-                return null;
+                return ;
 
+
+            cameraView = new CameraView();
+           
             displayInformation = DisplayInformation.GetForCurrentView();
             displayRequest = new DisplayRequest();
             bool processing = false;
             bool isAnalyzing = false;
             // Information about the camera device.
-
+            CaptureElement captureElement;
 
             isAnalyzing = true;
             BarcodeReader reader;
@@ -127,7 +129,7 @@ namespace Zebble.Plugin
             // Find which device to use
             var preferredCamera = await GetFilteredCameraOrDefaultAsync();
 
-            throw new Exception("No camera available");
+          //  throw new Exception("No camera available");
             if (preferredCamera == null)
             {
                 System.Diagnostics.Debug.WriteLine("No camera available");
@@ -160,11 +162,16 @@ namespace Zebble.Plugin
             }
 
             if (!isMediaCaptureInitialized)
-                return null;
+                return ;
 
             // Set the capture element's source to show it in the UI
-            CaptureElement captureElement = new CaptureElement();
+            //CaptureElement captureElement = new CaptureElement();
+            // var x=  cameraView.Render();
+        
+                captureElement = new CaptureElement { Stretch = Windows.UI.Xaml.Media.Stretch.UniformToFill };
+           //  captureElement.BindToSize(Renderer);
             captureElement.Source = mediaCapture;
+
 
             // Start the preview
             await mediaCapture.StartPreviewAsync();
@@ -176,7 +183,7 @@ namespace Zebble.Plugin
             foreach (var ap in availableProperties)
             {
                 var vp = (VideoEncodingProperties)ap;
-                System.Diagnostics.Debug.WriteLine("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
+               // System.Diagnostics.Debug.WriteLine("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
                 availableResolutions.Add(new CameraResolution { Width = (int)vp.Width, Height = (int)vp.Height });
             }
             CameraResolution previewResolution = null;
@@ -217,20 +224,25 @@ namespace Zebble.Plugin
 
                 var delay = 150;
 
-                if (stopping || processing || !isAnalyzing
+                if (stopping)
+                    return;
+
+                if ( processing || !isAnalyzing
                 || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
                 {
                     timerPreview.Change(delay, Timeout.Infinite);
                     return;
                 }
-
-
-
+                
                 processing = true;
 
             
                 try
                 {
+
+                    await Device.UIThread.Run(async () =>
+                    {
+                   
                     var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
 
                     var videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
@@ -243,7 +255,9 @@ namespace Zebble.Plugin
 
                     frameBitmap.CopyToBuffer(bitmap.PixelBuffer);
 
-                    result = reader.Decode(bitmap);
+                     result = reader.Decode(bitmap);
+                 
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -251,12 +265,15 @@ namespace Zebble.Plugin
                 }
 
 
-
                 // Check if a result was found
                 if (result != null && !string.IsNullOrEmpty(result.Text))
                 {
                     delay = 1000;
-                    ScanCallback(result);
+                    var barcodeResult = new BarcodeResult();
+
+                    barcodeResult.Format = (Format)result.BarcodeFormat;
+                    barcodeResult.Text = result.Text;
+                    ScanCallback(barcodeResult);
                 }
 
                 processing = false;
@@ -264,17 +281,7 @@ namespace Zebble.Plugin
                 timerPreview.Change(delay, Timeout.Infinite);
 
             }, null, 300, Timeout.Infinite);
-
-
-           if( result != null)
-            {
-               var  barcodeResult = new BarcodeResult();
-
-                barcodeResult.Format = (Format)result.BarcodeFormat;
-                barcodeResult.Text = result.Text;
-                return barcodeResult;
-            }
-            return null;
+            
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync()
@@ -347,12 +354,12 @@ namespace Zebble.Plugin
                 return;
 
             stopping = true;
-            isAnalyzing = false;
-
-            displayRequest.RequestRelease();
-
             try
             {
+
+                displayRequest.RequestRelease();
+
+          
                 if (IsTorchOn)
                     Torch(false);
                 if (isMediaCaptureInitialized)

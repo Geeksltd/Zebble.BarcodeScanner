@@ -10,18 +10,23 @@
     {
         public async Task<BarcodeResult> Scan(bool useCamer=true, OnError errorAction = OnError.Alert)
         {
+            var tcsResult = new TaskCompletionSource<BarcodeResult>();
+
             try
             {
-                return await DoScanAsync(  r =>
-                {
+                await DoScanAsync( r =>
+                {                   
                     StopScanning();
+                    tcsResult.SetResult(r);
                 }, useCamer);
+           
             }
             catch (Exception ex)
             {
                 await errorAction.Apply(ex, "Failed to scan a barcode");
                 return null;
-            }
+            }          
+            return await tcsResult.Task;
         }
 
       
