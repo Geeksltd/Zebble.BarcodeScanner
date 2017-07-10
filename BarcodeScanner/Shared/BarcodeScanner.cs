@@ -10,8 +10,9 @@
     {
         public async Task<BarcodeResult> Scan(bool useCamer=true, OnError errorAction = OnError.Alert)
         {
+            
             var tcsResult = new TaskCompletionSource<BarcodeResult>();
-
+           
             try
             {
                 await DoScanAsync( r =>

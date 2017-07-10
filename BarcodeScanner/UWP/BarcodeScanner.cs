@@ -15,6 +15,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.System.Display;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Zebble;
@@ -23,20 +24,19 @@ using ZXing;
 
 namespace Zebble.Plugin
 {
-    public partial class BarcodeScanner
+    public partial class BarcodeScanner 
     {
         CameraView cameraView;
        
-      
+        CaptureElement captureElement;
         DisplayInformation displayInformation;
         DisplayRequest displayRequest;
         MediaCapture mediaCapture;       
         bool isMediaCaptureInitialized = false;
         Timer timerPreview;
         bool stopping = false;
-       
-        static readonly Guid RotationKey = new Guid("C380465D-2271-428C-9B83-ECEA3B4A85C1");
-        public Action<BarcodeResult> ScanCallback { get; set; }
+      
+         public Action<BarcodeResult> ScanCallback { get; set; }
 
        
         public async Task DoScanAsync(Action < BarcodeResult> scanCallback, bool useCamera = true)
@@ -109,179 +109,112 @@ namespace Zebble.Plugin
         async Task StartScanning(Action<BarcodeResult> scanCallback)
         {
             if (stopping)
-                return ;
+                return;
+            await Add(cameraView = new CameraView());
+            
 
 
-            cameraView = new CameraView();
-           
             displayInformation = DisplayInformation.GetForCurrentView();
             displayRequest = new DisplayRequest();
             bool processing = false;
             bool isAnalyzing = false;
             // Information about the camera device.
-            CaptureElement captureElement;
 
             isAnalyzing = true;
             BarcodeReader reader;
             ZXing.Result result = null;
-          
+
             ScanCallback = scanCallback;
             // Find which device to use
             var preferredCamera = await GetFilteredCameraOrDefaultAsync();
 
-          //  throw new Exception("No camera available");
+            //  throw new Exception("No camera available");
             if (preferredCamera == null)
             {
                 System.Diagnostics.Debug.WriteLine("No camera available");
                 isMediaCaptureInitialized = false;
 
-              
+
                 throw new Exception("No camera available");
             }
-
-
-            mediaCapture = new MediaCapture();
-
-            // Initialize the capture with the settings above
-            try
-            {
-                await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
-                {
-                    StreamingCaptureMode = StreamingCaptureMode.Video,
-                    VideoDeviceId = preferredCamera.Id
-                });
-                isMediaCaptureInitialized = true;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                System.Diagnostics.Debug.WriteLine("Denied access to the camera");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Exception when init MediaCapture: {0}", ex);
-            }
-
-            if (!isMediaCaptureInitialized)
-                return ;
-
-            // Set the capture element's source to show it in the UI
-            //CaptureElement captureElement = new CaptureElement();
-            // var x=  cameraView.Render();
-        
-                captureElement = new CaptureElement { Stretch = Windows.UI.Xaml.Media.Stretch.UniformToFill };
-           //  captureElement.BindToSize(Renderer);
-            captureElement.Source = mediaCapture;
-
-
-            // Start the preview
-            await mediaCapture.StartPreviewAsync();
-
-
-            // Get all the available resolutions for preview
-            var availableProperties = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.VideoPreview);
-            var availableResolutions = new List<CameraResolution>();
-            foreach (var ap in availableProperties)
-            {
-                var vp = (VideoEncodingProperties)ap;
-               // System.Diagnostics.Debug.WriteLine("Camera Preview Resolution: {0}x{1}", vp.Width, vp.Height);
-                availableResolutions.Add(new CameraResolution { Width = (int)vp.Width, Height = (int)vp.Height });
-            }
-            CameraResolution previewResolution = null;
-
-
-            // If the user did not specify a resolution, let's try and find a suitable one
-            if (previewResolution == null)
-            {
-                // Loop through all supported sizes
-                foreach (var sps in availableResolutions)
-                {
-                    // Find one that's >= 640x360 but <= 1000x1000
-                    // This will likely pick the *smallest* size in that range, which should be fine
-                    if (sps.Width >= 640 && sps.Width <= 1000 && sps.Height >= 360 && sps.Height <= 1000)
-                    {
-                        previewResolution = new CameraResolution
-                        {
-                            Width = sps.Width,
-                            Height = sps.Height
-                        };
-                        break;
-                    }
-                }
-            }
-
-            if (previewResolution == null)
-                previewResolution = availableResolutions.LastOrDefault();
-
-            // Find the matching property based on the selection, again
-            var chosenProp = availableProperties.FirstOrDefault(ap => ((VideoEncodingProperties)ap).Width == previewResolution.Width && ((VideoEncodingProperties)ap).Height == previewResolution.Height);
-
-            await SetupAutoFocus();
+            
 
             reader = new BarcodeReader();
-
-            timerPreview = new Timer(async (state) =>
+            await cameraView.WhenShown(() =>
             {
-
-                var delay = 150;
-
-                if (stopping)
-                    return;
-
-                if ( processing || !isAnalyzing
-                || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
+                Device.UIThread.Run(() =>
                 {
-                    timerPreview.Change(delay, Timeout.Infinite);
-                    return;
-                }
-                
-                processing = true;
+                    var border = cameraView.Native as Windows.UI.Xaml.Controls.Border;
 
-            
-                try
-                {
+                    captureElement = border.Child as CaptureElement;
 
-                    await Device.UIThread.Run(async () =>
+                    mediaCapture = captureElement.Source;
+
+              
+                   timerPreview = new Timer(async (state) =>
                     {
-                   
-                    var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
 
-                    var videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
+                        var delay = 150;
 
-                    var frame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
+                        if (stopping)
+                            return;
 
-                    SoftwareBitmap frameBitmap = frame.SoftwareBitmap;
+                        if (processing || !isAnalyzing
+                        || (mediaCapture == null || mediaCapture.CameraStreamState != Windows.Media.Devices.CameraStreamState.Streaming))
+                        {
+                            timerPreview.Change(delay, Timeout.Infinite);
+                            return;
+                        }
 
-                    WriteableBitmap bitmap = new WriteableBitmap(frameBitmap.PixelWidth, frameBitmap.PixelHeight);
-
-                    frameBitmap.CopyToBuffer(bitmap.PixelBuffer);
-
-                     result = reader.Decode(bitmap);
-                 
-                    });
-                }
-                catch (Exception ex)
-                {
-
-                }
+                        processing = true;
 
 
-                // Check if a result was found
-                if (result != null && !string.IsNullOrEmpty(result.Text))
-                {
-                    delay = 1000;
-                    var barcodeResult = new BarcodeResult();
+                        try
+                        {
 
-                    barcodeResult.Format = (Format)result.BarcodeFormat;
-                    barcodeResult.Text = result.Text;
-                    ScanCallback(barcodeResult);
-                }
+                            await Device.UIThread.Run(async () =>
+                            {
 
-                processing = false;
+                                var previewProperties = mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.VideoPreview) as VideoEncodingProperties;
 
-                timerPreview.Change(delay, Timeout.Infinite);
+                                var videoFrame = new VideoFrame(BitmapPixelFormat.Bgra8, (int)previewProperties.Width, (int)previewProperties.Height);
 
-            }, null, 300, Timeout.Infinite);
-            
+                                var frame = await mediaCapture.GetPreviewFrameAsync(videoFrame);
+
+                                SoftwareBitmap frameBitmap = frame.SoftwareBitmap;
+
+                                WriteableBitmap bitmap = new WriteableBitmap(frameBitmap.PixelWidth, frameBitmap.PixelHeight);
+
+                                frameBitmap.CopyToBuffer(bitmap.PixelBuffer);
+
+                                result = reader.Decode(bitmap);
+
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+
+
+                        // Check if a result was found
+                        if (result != null && !string.IsNullOrEmpty(result.Text))
+                        {
+                            delay = 1000;
+                            var barcodeResult = new BarcodeResult();
+
+                            barcodeResult.Format = (Format)result.BarcodeFormat;
+                            barcodeResult.Text = result.Text;
+                            ScanCallback(barcodeResult);
+                        }
+
+                        processing = false;
+
+                        timerPreview.Change(delay, Timeout.Infinite);
+
+                    }, null, 300, Timeout.Infinite);
+                });
+            });
         }
 
         async Task<DeviceInformation> GetFilteredCameraOrDefaultAsync()
@@ -305,48 +238,6 @@ namespace Zebble.Plugin
 
             return selectedCamera;
         }
-
-        async Task SetupAutoFocus()
-        {
-            if (IsFocusSupported)
-            {
-                var focusControl = mediaCapture.VideoDeviceController.FocusControl;
-
-                var focusSettings = new FocusSettings();
-                focusSettings.AutoFocusRange = focusControl.SupportedFocusRanges.Contains(AutoFocusRange.FullRange)
-                    ? AutoFocusRange.FullRange
-                    : focusControl.SupportedFocusRanges.FirstOrDefault();
-
-                var supportedFocusModes = focusControl.SupportedFocusModes;
-                if (supportedFocusModes.Contains(FocusMode.Continuous))
-                {
-                    focusSettings.Mode = FocusMode.Continuous;
-                }
-                else if (supportedFocusModes.Contains(FocusMode.Auto))
-                {
-                    focusSettings.Mode = FocusMode.Auto;
-                }
-
-                if (focusSettings.Mode == FocusMode.Continuous || focusSettings.Mode == FocusMode.Auto)
-                {
-                    focusSettings.WaitForFocus = false;
-                    focusControl.Configure(focusSettings);
-                    await focusControl.FocusAsync();
-                }
-            }
-        }
-        bool IsFocusSupported
-        {
-            get
-            {
-                return mediaCapture != null
-                    && isMediaCaptureInitialized
-                    && mediaCapture.VideoDeviceController != null
-                    && mediaCapture.VideoDeviceController.FocusControl != null
-                    && mediaCapture.VideoDeviceController.FocusControl.Supported;
-            }
-        }
-
 
         public async void StopScanning()
         {
@@ -405,11 +296,5 @@ namespace Zebble.Plugin
                 return HasTorch && mediaCapture.VideoDeviceController.TorchControl.Enabled;
             }
         }
-    }
-
-    public class CameraResolution
-    {
-        public int Width { get; set; }
-        public int Height { get; set; }
     }
 }
