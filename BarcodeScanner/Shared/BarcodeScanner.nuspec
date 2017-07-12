@@ -10,9 +10,12 @@
     <projectUrl>https://github.com/Geeksltd/BarcodeScannerPlugin</projectUrl>
     <copyright>Copyright ©2017 Geeks Ltd</copyright>
     <dependencies>
-      <dependency id="ZXing.Net.Mobile"  version="2.2.9" />
-      <dependency id="FastAndroidCamera"  version="2.0.0" />
-      <dependency id="Xamarin.Android.Support.v4"  version="25.3.1" />
+      <group targetFramework="MonoAndroid10">
+        <dependency id="ZXing.Net.Mobile"  version="2.2.9" />
+        <dependency id="FastAndroidCamera"  version="2.0.0" />
+        <dependency id="Xamarin.Android.Support.v4"  version="25.3.1" />
+      </group>
+     
     </dependencies>
   </metadata>
   
@@ -20,6 +23,8 @@
     <file src="lib\BarcodeScanner.iOS.*" target="lib\Xamarin.iOS10\" />
     <file src="lib\BarcodeScanner.Android.*" target="lib\MonoAndroid10\" />
     <file src="lib\BarcodeScanner.UWP.*" target="lib\UAP10\" />
-    <file src="lib\zxing.dll" target="lib\UAP10\zxing.dll" />  
+    
+    <!-- UWP reference assemblies -->
+    <file src="lib\BarcodeScanner.UWP\zxing.dll" target="lib\UAP10\zxing.dll" />  
   </files>
 </package>
