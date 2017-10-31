@@ -5,11 +5,11 @@
     <version>1.0.1</version>
     <title>Barcode Scanner for Zebble</title>
     <description>A plugin to allow scanning barcodes for Zebble for Xamarin projects.</description>
-    <authors>Mobile App Technologies Ltd</authors>
-    <owners>Mobile App Technologies Ltd</owners>
+    <authors>Geeks Ltd</authors>
+    <owners>Geeks Ltd</owners>
     <projectUrl>https://github.com/Geeksltd/Zebble.BarcodeScanner</projectUrl>
 	<iconUrl>https://raw.githubusercontent.com/Geeksltd/Zebble.BarcodeScanner/master/Shared/NuGet/Icon.png</iconUrl>
-    <copyright>Copyright ©2017 Mobile App Technologies Ltd</copyright>
+    <copyright>Copyright ©2017 Geeks Ltd</copyright>
     <dependencies>
       <group targetFramework="MonoAndroid10">
         <dependency id="ZXing.Net.Mobile"  version="2.2.9" />
