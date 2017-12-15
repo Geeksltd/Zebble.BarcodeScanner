@@ -1,9 +1,11 @@
-﻿using System;
-using System.Linq;
-namespace Zebble
+﻿namespace Zebble
 {
     public partial class BarcodeScanner
     {
-        void InitializeScanner() { }
+        void InitializeScanner()
+        {
+            ZXing.Net.Mobile.Forms.WindowsUniversal.ZXingScannerViewRenderer.Init();
+            Scanner = new MobileBarcodeScanner();
+        }
     }
 }

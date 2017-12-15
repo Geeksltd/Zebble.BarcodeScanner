@@ -10,7 +10,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>BarcodeScanner.iOS</AssemblyName>
+    <AssemblyName>Zebble.BarcodeScanner.iOS</AssemblyName>
     <OutputPath>..\lib\</OutputPath>
     <DefineConstants>__UNIFIED__;__MOBILE__;__IOS__;IOS;</DefineConstants>
   </PropertyGroup>
@@ -39,7 +39,7 @@
     <Reference Include="System.Core" />
     <Reference Include="Xamarin.iOS" />
     <Reference Include="Zebble.iOS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Zebble.4.2.371\lib\Xamarin.iOS10\Zebble.iOS.dll</HintPath>
+      <HintPath>..\packages\Zebble.4.2.373\lib\Xamarin.iOS10\Zebble.iOS.dll</HintPath>
     </Reference>
     <Reference Include="ZXing.Net.Mobile.Core, Version=2.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ZXing.Net.Mobile.2.3.2\lib\Xamarin.iOS10\ZXing.Net.Mobile.Core.dll</HintPath>
