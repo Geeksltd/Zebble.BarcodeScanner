@@ -1,31 +1,33 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>Zebble.BarcodeScanner</id>
-    <version>1.0.1</version>
+    <version>1.2.102</version>
     <title>Barcode Scanner for Zebble</title>
+    <projectUrl>https://github.com/Geeksltd/Zebble.BarcodeScanner</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/Geeksltd/Zebble.BarcodeScanner/master/Shared/NuGet/Icon.png</iconUrl>
+    <copyright>Copyright ©2017 Geeks Ltd - All rights reserved.</copyright>
     <description>A plugin to allow scanning barcodes for Zebble for Xamarin projects.</description>
     <authors>Geeks Ltd</authors>
     <owners>Geeks Ltd</owners>
-    <projectUrl>https://github.com/Geeksltd/Zebble.BarcodeScanner</projectUrl>
-	<iconUrl>https://raw.githubusercontent.com/Geeksltd/Zebble.BarcodeScanner/master/Shared/NuGet/Icon.png</iconUrl>
-    <copyright>Copyright ©2017 Geeks Ltd</copyright>
     <dependencies>
       <group targetFramework="MonoAndroid10">
-        <dependency id="ZXing.Net.Mobile"  version="2.2.9" />
-        <dependency id="FastAndroidCamera"  version="2.0.0" />
-        <dependency id="Xamarin.Android.Support.v4"  version="25.3.1" />
+        <dependency id="ZXing.Net.Mobile" version="2.3.2" />
+        <dependency id="FastAndroidCamera" version="2.0.0" />
+        <dependency id="Xamarin.Android.Support.v4" version="26.1.0.1" />
       </group>
-     
+      <group targetFramework="Xamarin.iOS10">
+        <dependency id="ZXing.Net.Mobile" version="2.3.2" />
+      </group>
+      <group targetFramework="UAP10">
+        <dependency id="ZXing.Net.Mobile" version="2.3.2" />
+        <dependency id="ZXing.Net.Mobile.Forms" version="2.3.2" />
+      </group>
     </dependencies>
   </metadata>
-  
   <files>
-    <file src="lib\BarcodeScanner.iOS.*" target="lib\Xamarin.iOS10\" />
-    <file src="lib\BarcodeScanner.Android.*" target="lib\MonoAndroid10\" />
-    <file src="lib\BarcodeScanner.UWP.*" target="lib\UAP10\" />
-    
-    <!-- UWP reference assemblies -->
-    <file src="lib\BarcodeScanner.UWP\zxing.dll" target="lib\UAP10\zxing.dll" />  
+    <file src="..\..\lib\Zebble.BarcodeScanner.iOS.*" target="lib\Xamarin.iOS10\" />
+    <file src="..\..\lib\Zebble.BarcodeScanner.Android.*" target="lib\MonoAndroid10\" />
+    <file src="..\..\lib\Zebble.BarcodeScanner.UWP.*" target="lib\UAP10\" />
   </files>
 </package>
