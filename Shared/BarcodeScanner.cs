@@ -18,7 +18,7 @@
 
             try
             {
-                return await Device.UIThread.Run(() => DoScan(useCamera));
+                return await Thread.UI.Run(() => DoScan(useCamera));
             }
             catch (Exception ex)
             {
