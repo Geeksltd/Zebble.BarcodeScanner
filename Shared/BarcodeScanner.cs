@@ -12,13 +12,13 @@
         public List<BarcodeFormat> PossibleFormats { get; set; }
         public View ScanningOlerlay;
 
-        public async Task<BarcodeResult> Scan(bool useCamera = true, OnError errorAction = OnError.Alert)
+        public async Task<BarcodeResult> Scan(bool useFrontCamera = false, OnError errorAction = OnError.Alert)
         {
             var tcsResult = new TaskCompletionSource<BarcodeResult>();
 
             try
             {
-                return await Thread.UI.Run(() => DoScan(useCamera));
+                return await Thread.UI.Run(() => DoScan(useFrontCamera));
             }
             catch (Exception ex)
             {
@@ -27,13 +27,14 @@
             }
         }
 
-        async Task<BarcodeResult> DoScan(bool useCamera)
+        async Task<BarcodeResult> DoScan(bool useFrontCamera)
         {
             InitializeScanner();
 
             var options = new MobileBarcodeScanningOptions
             {
-                PossibleFormats = PossibleFormats ?? new List<ZXing.BarcodeFormat>() { ZXing.BarcodeFormat.All_1D }
+                PossibleFormats = PossibleFormats ?? new List<ZXing.BarcodeFormat>() { ZXing.BarcodeFormat.All_1D },
+                UseFrontCameraIfAvailable = useFrontCamera
             };
 
             if (ScanningOlerlay != null)
