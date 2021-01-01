@@ -10,7 +10,7 @@
     {
         MobileBarcodeScanner Scanner;
         public List<BarcodeFormat> PossibleFormats { get; set; }
-        public View ScanningOlerlay;
+        public View ScanningOverlay;
 
         public async Task<BarcodeResult> Scan(bool useFrontCamera = false, OnError errorAction = OnError.Alert)
         {
@@ -33,14 +33,14 @@
 
             var options = new MobileBarcodeScanningOptions
             {
-                PossibleFormats = PossibleFormats ?? new List<ZXing.BarcodeFormat>() { ZXing.BarcodeFormat.All_1D },
+                PossibleFormats = PossibleFormats ?? new List<BarcodeFormat> { BarcodeFormat.All_1D },
                 UseFrontCameraIfAvailable = useFrontCamera
             };
 
-            if (ScanningOlerlay != null)
+            if (ScanningOverlay != null)
             {
                 Scanner.UseCustomOverlay = true;
-                var overlay = await ScanningOlerlay.Render();
+                var overlay = await ScanningOverlay.Render();
                 Scanner.CustomOverlay = overlay.Native();
             }
 

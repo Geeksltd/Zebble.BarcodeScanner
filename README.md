@@ -1,4 +1,4 @@
-[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.BarcodeScanner/master/Shared/NuGet/Icon.png "Zebble.BarcodeScanner"
+﻿[logo]: https://raw.githubusercontent.com/Geeksltd/Zebble.BarcodeScanner/master/icon.png "Zebble.BarcodeScanner"
 
 
 ## Zebble.BarcodeScanner
