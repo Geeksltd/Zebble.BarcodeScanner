@@ -7,7 +7,7 @@
     <RootNamespace>Zebble</RootNamespace>
     <PackageId>Zebble.Plugin_BarcodeScanner</PackageId>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <Version>1.0.0</Version>
+    <Version>1.0.1.0</Version>
     <PackOnBuild>true</PackOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <LangVersion>default</LangVersion>
@@ -70,8 +70,8 @@
     <PackageReference Include="ZXing.Net.Mobile" Version="3.0.0-beta5" />
   </ItemGroup>
   <ItemGroup>
-	<Folder Include="Android\" />
-	<Folder Include="iOS\" />
-	<Folder Include="UWP\" />
+    <Folder Include="Android\" />
+    <Folder Include="iOS\" />
+    <Folder Include="UWP\" />
   </ItemGroup>
 </Project>
