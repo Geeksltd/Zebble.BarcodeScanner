@@ -44,7 +44,11 @@
                 Scanner.CustomOverlay = overlay.Native();
             }
 
+#if IOS
+            var result = await Scanner.Scan(options, useAVCaptureEngine: true);
+#else
             var result = await Scanner.Scan(options);
+#endif
 
             if (result == null) return null;
 
