@@ -6,7 +6,7 @@
     {
         void InitializeScanner()
         {
-            MobileBarcodeScanner.Initialize(UIRuntime.CurrentActivity.Application);
+            Xamarin.Essentials.Platform.Init(UIRuntime.CurrentActivity.Application);
             Scanner = new MobileBarcodeScanner();
         }
     }
